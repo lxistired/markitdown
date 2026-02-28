@@ -108,7 +108,7 @@ Write-Host "    1. 检查并安装 Node.js (使用国内镜像)" -ForegroundColo
 Write-Host "    2. 检查并安装 Git     (使用国内镜像)" -ForegroundColor White
 Write-Host "    3. 配置 npm 国内镜像源" -ForegroundColor White
 Write-Host "    4. 安装 Claude Code (npm)" -ForegroundColor White
-Write-Host "    5. 配置国产大模型 API (智谱GLM/DeepSeek/月之暗面等)" -ForegroundColor White
+Write-Host "    5. 配置国产大模型 API (DeepSeek/Qwen/GLM/Kimi/ERNIE)" -ForegroundColor White
 Write-Host ""
 Write-Host "  注意: 本脚本需要以 管理员身份 运行" -ForegroundColor Yellow
 Write-Host ""
@@ -257,11 +257,11 @@ Write-Host "  ================================================================" 
 Write-Host ""
 Write-Host "  请选择您要使用的 API 提供商:" -ForegroundColor White
 Write-Host ""
-Write-Host "    [1] 智谱 GLM (ChatGLM)    - https://open.bigmodel.cn" -ForegroundColor White
-Write-Host "    [2] DeepSeek              - https://platform.deepseek.com" -ForegroundColor White
-Write-Host "    [3] 月之暗面 (Moonshot/Kimi) - https://platform.moonshot.cn" -ForegroundColor White
-Write-Host "    [4] 阿里通义千问 (Qwen)     - https://dashscope.aliyuncs.com" -ForegroundColor White
-Write-Host "    [5] 百度文心一言 (ERNIE)    - https://qianfan.baidubce.com" -ForegroundColor White
+Write-Host "    [1] 智谱 GLM (glm-5 旗舰)       - https://open.bigmodel.cn" -ForegroundColor White
+Write-Host "    [2] DeepSeek (V3.2 最新)        - https://platform.deepseek.com" -ForegroundColor White
+Write-Host "    [3] 月之暗面 Kimi (K2.5 旗舰)   - https://platform.moonshot.cn" -ForegroundColor White
+Write-Host "    [4] 阿里通义千问 (Qwen3.5 最新) - https://dashscope.aliyuncs.com" -ForegroundColor White
+Write-Host "    [5] 百度文心 ERNIE (4.5 旗舰)   - https://qianfan.baidubce.com" -ForegroundColor White
 Write-Host "    [6] OpenAI 兼容的其他接口 (自定义)" -ForegroundColor White
 Write-Host "    [7] 暂时跳过，稍后手动配置" -ForegroundColor White
 Write-Host ""
@@ -271,9 +271,9 @@ $providerChoice = Read-Host "  请输入选项编号 (1-7)"
 # 定义各提供商的配置信息
 $providers = @{
     "1" = @{
-        Name       = "智谱 GLM (ChatGLM)"
+        Name       = "智谱 GLM"
         BaseUrl    = "https://open.bigmodel.cn/api/paas/v4"
-        Model      = "glm-4-plus"
+        Model      = "glm-5"
         KeyName    = "GLM API Key"
         GetKeyUrl  = "https://open.bigmodel.cn/usercenter/apikeys"
         GetKeyHelp = @"
@@ -284,7 +284,8 @@ $providers = @{
     4. 点击 '创建 API Key'
     5. 复制生成的 Key
 "@
-        Models     = @("glm-4-plus", "glm-4", "glm-4-long", "glm-4-flash", "glm-4-air")
+        Models     = @("glm-5", "glm-4.7", "glm-4.5", "glm-4.7-flash", "glm-4-flash")
+        ModelDescs = @("旗舰模型 745B MoE，最强", "编程增强 SWE-bench 73.8", "Agent基座，工具调用优化", "30B MoE 轻量快速", "免费模型")
     }
     "2" = @{
         Name       = "DeepSeek"
@@ -300,13 +301,14 @@ $providers = @{
     4. 点击 '创建 API Key'
     5. 复制生成的 Key
 "@
-        Models     = @("deepseek-chat", "deepseek-coder", "deepseek-reasoner")
+        Models     = @("deepseek-chat", "deepseek-reasoner")
+        ModelDescs = @("V3.2 通用对话+工具调用，最强", "V3.2 深度推理/数学/代码")
     }
     "3" = @{
-        Name       = "月之暗面 (Moonshot/Kimi)"
+        Name       = "月之暗面 (Kimi)"
         BaseUrl    = "https://api.moonshot.cn/v1"
-        Model      = "moonshot-v1-auto"
-        KeyName    = "Moonshot API Key"
+        Model      = "kimi-k2.5"
+        KeyName    = "Kimi API Key"
         GetKeyUrl  = "https://platform.moonshot.cn/console/api-keys"
         GetKeyHelp = @"
   获取 API Key 的步骤:
@@ -316,12 +318,13 @@ $providers = @{
     4. 点击 '新建 API Key'
     5. 复制生成的 Key
 "@
-        Models     = @("moonshot-v1-auto", "moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k")
+        Models     = @("kimi-k2.5", "kimi-k2", "moonshot-v1-128k", "moonshot-v1-32k")
+        ModelDescs = @("最新旗舰 1T MoE 多模态+Agent", "K2 推理增强 256K上下文", "经典长文本 128K", "经典 32K")
     }
     "4" = @{
         Name       = "阿里通义千问 (Qwen)"
         BaseUrl    = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-        Model      = "qwen-max"
+        Model      = "qwen3.5-plus"
         KeyName    = "DashScope API Key"
         GetKeyUrl  = "https://dashscope.console.aliyun.com/apiKey"
         GetKeyHelp = @"
@@ -333,12 +336,13 @@ $providers = @{
     5. 点击 '创建新的 API-KEY'
     6. 复制生成的 Key
 "@
-        Models     = @("qwen-max", "qwen-plus", "qwen-turbo", "qwen-long")
+        Models     = @("qwen3.5-plus", "qwen3-max", "qwq-plus", "qwen-plus", "qwen-turbo")
+        ModelDescs = @("最新旗舰 397B MoE，最强", "Qwen3 旗舰，万亿参数", "深度推理模型", "性价比之选", "轻量快速低成本")
     }
     "5" = @{
-        Name       = "百度文心一言 (ERNIE)"
+        Name       = "百度文心 (ERNIE)"
         BaseUrl    = "https://qianfan.baidubce.com/v2"
-        Model      = "ernie-4.0-turbo-8k"
+        Model      = "ernie-4.5"
         KeyName    = "千帆 API Key"
         GetKeyUrl  = "https://console.bce.baidu.com/qianfan/ais/console/applicationConsole/application"
         GetKeyHelp = @"
@@ -348,7 +352,8 @@ $providers = @{
     3. 创建应用，获取 API Key 和 Secret Key
     4. 复制 API Key
 "@
-        Models     = @("ernie-4.0-turbo-8k", "ernie-4.0-8k", "ernie-3.5-8k")
+        Models     = @("ernie-4.5", "ernie-4.5-turbo", "ernie-4.0-turbo", "ernie-3.5")
+        ModelDescs = @("最新旗舰 300B MoE，最强", "快速版 128K上下文", "4.0 系列快速版", "经济实惠")
     }
 }
 
@@ -381,7 +386,11 @@ if ($providerChoice -ge "1" -and $providerChoice -le "5") {
         Write-Host "  可用模型:" -ForegroundColor White
         for ($i = 0; $i -lt $provider.Models.Count; $i++) {
             $defaultTag = if ($i -eq 0) { " (推荐)" } else { "" }
-            Write-Host "    [$($i+1)] $($provider.Models[$i])$defaultTag" -ForegroundColor White
+            $desc = ""
+            if ($provider.ModelDescs -and $i -lt $provider.ModelDescs.Count) {
+                $desc = " - $($provider.ModelDescs[$i])"
+            }
+            Write-Host "    [$($i+1)] $($provider.Models[$i])$desc$defaultTag" -ForegroundColor White
         }
         Write-Host ""
         $modelChoice = Read-Host "  请选择模型编号 (默认 1)"

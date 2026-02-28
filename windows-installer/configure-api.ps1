@@ -123,38 +123,43 @@ function Clear-ApiConfig {
 # ---------------------------------------------------------------------------
 $providers = @{
     "1" = @{
-        Name       = "智谱 GLM (ChatGLM)"
+        Name       = "智谱 GLM"
         BaseUrl    = "https://open.bigmodel.cn/api/paas/v4"
         KeyUrl     = "https://open.bigmodel.cn/usercenter/apikeys"
-        Models     = @("glm-4-plus", "glm-4", "glm-4-long", "glm-4-flash", "glm-4-air")
+        Models     = @("glm-5", "glm-4.7", "glm-4.5", "glm-4.7-flash", "glm-4-flash")
+        ModelDescs = @("旗舰模型 745B MoE，最强", "编程增强 SWE-bench 73.8", "Agent基座，工具调用优化", "30B MoE 轻量快速", "免费模型")
         Help       = "注册地址: https://open.bigmodel.cn -> 右上角头像 -> API 密钥 -> 创建"
     }
     "2" = @{
         Name       = "DeepSeek"
         BaseUrl    = "https://api.deepseek.com"
         KeyUrl     = "https://platform.deepseek.com/api_keys"
-        Models     = @("deepseek-chat", "deepseek-coder", "deepseek-reasoner")
+        Models     = @("deepseek-chat", "deepseek-reasoner")
+        ModelDescs = @("V3.2 通用对话+工具调用，最强", "V3.2 深度推理/数学/代码")
         Help       = "注册地址: https://platform.deepseek.com -> API Keys -> 创建"
     }
     "3" = @{
-        Name       = "月之暗面 (Moonshot/Kimi)"
+        Name       = "月之暗面 (Kimi)"
         BaseUrl    = "https://api.moonshot.cn/v1"
         KeyUrl     = "https://platform.moonshot.cn/console/api-keys"
-        Models     = @("moonshot-v1-auto", "moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k")
+        Models     = @("kimi-k2.5", "kimi-k2", "moonshot-v1-128k", "moonshot-v1-32k")
+        ModelDescs = @("最新旗舰 1T MoE 多模态+Agent", "K2 推理增强 256K上下文", "经典长文本 128K", "经典 32K")
         Help       = "注册地址: https://platform.moonshot.cn -> 控制台 -> API Key 管理 -> 新建"
     }
     "4" = @{
         Name       = "阿里通义千问 (Qwen)"
         BaseUrl    = "https://dashscope.aliyuncs.com/compatible-mode/v1"
         KeyUrl     = "https://dashscope.console.aliyun.com/apiKey"
-        Models     = @("qwen-max", "qwen-plus", "qwen-turbo", "qwen-long")
+        Models     = @("qwen3.5-plus", "qwen3-max", "qwq-plus", "qwen-plus", "qwen-turbo")
+        ModelDescs = @("最新旗舰 397B MoE，最强", "Qwen3 旗舰，万亿参数", "深度推理模型", "性价比之选", "轻量快速低成本")
         Help       = "注册地址: https://dashscope.console.aliyun.com -> API-KEY 管理 -> 创建"
     }
     "5" = @{
-        Name       = "百度文心一言 (ERNIE)"
+        Name       = "百度文心 (ERNIE)"
         BaseUrl    = "https://qianfan.baidubce.com/v2"
         KeyUrl     = "https://console.bce.baidu.com/qianfan/ais/console/applicationConsole/application"
-        Models     = @("ernie-4.0-turbo-8k", "ernie-4.0-8k", "ernie-3.5-8k")
+        Models     = @("ernie-4.5", "ernie-4.5-turbo", "ernie-4.0-turbo", "ernie-3.5")
+        ModelDescs = @("最新旗舰 300B MoE，最强", "快速版 128K上下文", "4.0 系列快速版", "经济实惠")
         Help       = "注册地址: https://qianfan.baidubce.com -> 创建应用 -> 获取 API Key"
     }
 }
@@ -172,11 +177,11 @@ while ($true) {
     Show-CurrentConfig
 
     Write-Host "  请选择操作:" -ForegroundColor White
-    Write-Host "    [1] 配置 智谱 GLM (ChatGLM)" -ForegroundColor White
-    Write-Host "    [2] 配置 DeepSeek" -ForegroundColor White
-    Write-Host "    [3] 配置 月之暗面 (Moonshot/Kimi)" -ForegroundColor White
-    Write-Host "    [4] 配置 阿里通义千问 (Qwen)" -ForegroundColor White
-    Write-Host "    [5] 配置 百度文心一言 (ERNIE)" -ForegroundColor White
+    Write-Host "    [1] 配置 智谱 GLM      (glm-5 旗舰)" -ForegroundColor White
+    Write-Host "    [2] 配置 DeepSeek       (V3.2 最新)" -ForegroundColor White
+    Write-Host "    [3] 配置 月之暗面 Kimi   (K2.5 旗舰)" -ForegroundColor White
+    Write-Host "    [4] 配置 阿里通义千问    (Qwen3.5 最新)" -ForegroundColor White
+    Write-Host "    [5] 配置 百度文心 ERNIE  (4.5 旗舰)" -ForegroundColor White
     Write-Host "    [6] 自定义 API 接口" -ForegroundColor White
     Write-Host "    [7] 清除所有 API 配置" -ForegroundColor White
     Write-Host "    [8] 测试当前 API 连接" -ForegroundColor White
@@ -216,7 +221,11 @@ while ($true) {
         Write-Host "  可用模型:" -ForegroundColor White
         for ($i = 0; $i -lt $provider.Models.Count; $i++) {
             $tag = if ($i -eq 0) { " (推荐)" } else { "" }
-            Write-Host "    [$($i+1)] $($provider.Models[$i])$tag" -ForegroundColor White
+            $desc = ""
+            if ($provider.ModelDescs -and $i -lt $provider.ModelDescs.Count) {
+                $desc = " - $($provider.ModelDescs[$i])"
+            }
+            Write-Host "    [$($i+1)] $($provider.Models[$i])$desc$tag" -ForegroundColor White
         }
         $modelChoice = Read-Host "  请选择模型 (默认 1)"
         if ([string]::IsNullOrWhiteSpace($modelChoice)) { $modelChoice = "1" }
